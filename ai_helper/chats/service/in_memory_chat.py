@@ -2,11 +2,9 @@
 InMemoryChat реализация
 """
 
-from typing import List
+from typing import List, Dict
 
-from ai_helper.chats.service.enums import Roles
 from ai_helper.chats.service.chat_interface import ChatInterface
-from ai_helper.chats.service.message import Message
 
 
 class InMemoryChat(ChatInterface):
@@ -18,9 +16,9 @@ class InMemoryChat(ChatInterface):
 
     def __init__(self,
                student_id,
-               full_name: str,
-               timetable: dict,
-               course: str
+               full_name: str = None,
+               timetable: dict = None,
+               course: str = None,
                ) -> None:
         """
 
@@ -37,7 +35,7 @@ class InMemoryChat(ChatInterface):
         self.__full_name: str = full_name
         self.__timetable: dict = timetable
         self.__course: str = course
-        self.__chat_history: List[Message] = []
+        self.__chat_history: List[Dict[str, str]] = []
 
     def send_message(self, text: str) -> None:
         """
@@ -46,7 +44,7 @@ class InMemoryChat(ChatInterface):
         :param text: сообщение ИИ помощника
         """
 
-        self.__new_message(text, Roles.HELPER)
+        self.__new_message(text, "helper")
         # TODO: реализуй обновление чата и закрытие сокета
 
     def receive_message(self, text) -> None:
@@ -55,7 +53,7 @@ class InMemoryChat(ChatInterface):
         Остальное см. в документации интерфейса
         :param text: текст сообщения
         """
-        self.__new_message(text, Roles.STUDENT)
+        self.__new_message(text, "student")
         # TODO: реализуй запрос в нейросеть и открытие сокета
 
     def delete_chat(self) -> None:
@@ -65,12 +63,22 @@ class InMemoryChat(ChatInterface):
         """
         pass
 
-    def __new_message(self, text: str, role: Roles) -> None:
+    def __new_message(self, text: str, role: str) -> None:
         """
         Создайте новое сообщение в чате
         :param text: текст сообщения
         :param role: кто отправил сообщение
         """
 
-        message = Message(text, Roles.HELPER)
+        message = {"text": text, role: role}
         self.__chat_history.append(message)
+
+
+    @property
+    def chat_history(self):
+        """
+        История чатов не может быть изменена, но должна быть доступна из вне
+        :return: история чатов
+        """
+
+        return self.__chat_history
