@@ -3,9 +3,9 @@ ChatFactory класс
 """
 from typing import Optional
 
-from backend.chats.service.chat_dispatcher import ChatDispatcher
-from backend.chats.service.chat_interface import ChatInterface
-from backend.chats.service.in_memory_chat import InMemoryChat
+from chats.service.chat_dispatcher import ChatDispatcher
+from chats.service.chat_interface import ChatInterface
+from chats.service.in_memory_chat import InMemoryChat
 
 
 class ChatFactory:

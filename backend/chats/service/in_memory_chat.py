@@ -4,7 +4,8 @@ InMemoryChat реализация
 
 from typing import List, Dict
 
-from backend.chats.service.chat_interface import ChatInterface
+from chats.service.chat_interface import ChatInterface
+from chats.service.producer import KafkaProducer
 
 
 class InMemoryChat(ChatInterface):
@@ -12,14 +13,12 @@ class InMemoryChat(ChatInterface):
     in-memory реализация чата. Реализует ChatInterface
     """
 
-
-
     def __init__(self,
-               student_id,
-               full_name: str = None,
-               timetable: dict = None,
-               course: str = None,
-               ) -> None:
+                 student_id,
+                 full_name: str = None,
+                 timetable: dict = None,
+                 course: str = None,
+                 ) -> None:
         """
 
 
@@ -54,7 +53,13 @@ class InMemoryChat(ChatInterface):
         :param text: текст сообщения
         """
         self.__new_message(text, "student")
-        # TODO: реализуй запрос в нейросеть и открытие сокета
+        KafkaProducer().produce_new_message(
+            chat=self.__chat_history,
+            student_id=self.__student_id,
+            full_name=self.__full_name,
+            timetable=self.__timetable,
+            course=self.__course
+        )
 
     def delete_chat(self) -> None:
         """
@@ -72,7 +77,6 @@ class InMemoryChat(ChatInterface):
 
         message = {"text": text, role: role}
         self.__chat_history.append(message)
-
 
     @property
     def chat_history(self):

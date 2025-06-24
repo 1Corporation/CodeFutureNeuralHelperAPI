@@ -1,9 +1,13 @@
-from rest_framework.request import Request
+"""
+Общие API эндпоинты, которые нельзя присвоить конкретному сервису
+"""
+
+
 from rest_framework.decorators import api_view
-from asgiref.sync import sync_to_async
+from rest_framework.request import Request
 
+from api.decorators import service_auth_required
 
-from abc import ABC, abstractmethod
 
 
 @api_view(['GET'])
@@ -18,4 +22,20 @@ async def ping_ai(request: Request):
     :return:
     """
     pass
+
+
+@api_view(['GET'])
+@service_auth_required
+async def new_answer(request: Request):
+    """
+    Отправьте на этот эндпоинт ответ от ИИ, и направьте его пользователю
+    Запрос требует сервисной авторизации по SECRET_KEY (смотри документацию декоратора service auth required
+    """
+
+    student_id = request.data.get("student_id")
+    answer = request.data.get("answer")
+
+
+
+
 

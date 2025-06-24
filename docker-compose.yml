@@ -3,50 +3,39 @@ version: '3'
 
 services:
 
-    nginx:
-        build:
-            context: .
-            dockerfile: ./dockerfiles/nginx/Dockerfile
-        depends_on:
-            - daphne
-        ports:
-            - "80:80"
+  backend:
+    build:
+      context: .
+      dockerfile: dockerfiles/backend/Dockerfile
+    tty: true
+    command: sh -c "python3 manage.py migrate && python3 -u -m daphne new_year.asgi:application -b backend -p 8000"
+    restart: always
+    expose:
+      - 8000
 
-    database:
-        build:
-            context: .
-            dockerfile: ./dockerfiles/database/Dockerfile
-        environment:
-            POSTGRES_DB: "database"
-            POSTGRES_USER: "user"
-            POSTGRES_PASSWORD: "12345678"
-        expose:
-            - 5432
+  ai:
 
-    daphne:
-        build:
-            context: .
-            dockerfile: ./dockerfiles/web/Dockerfile
-        tty: true
-        command: sh -c "python3 manage.py migrate && python3 -u -m daphne new_year.asgi:application -b daphne -p 8000"
-        depends_on:
-            - database
-        restart: always
-        expose:
-           - 8000
+    
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
 
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+            
 
-    telegram:
-        build:
-            context: .
-            dockerfile: ./dockerfiles/telegram/Dockerfile
-        command: python3 -u telegram/main.py
-        depends_on:
-            - database
-        tty: true
-        environment:
-            - PYTHONPATH=.
-
-networks:
-    database_network:
-        driver: bridge
+        

@@ -3,7 +3,7 @@
 
 from typing import Dict, Optional
 
-from backend.chats.service.chat_interface import ChatInterface
+from chats.service.chat_interface import ChatInterface
 
 class ChatDispatcher:
     """

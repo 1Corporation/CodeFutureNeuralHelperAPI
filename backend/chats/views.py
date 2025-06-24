@@ -1,8 +1,10 @@
+
+
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from backend.chats.service import ChatInterface, ChatFactory
+from chats.service import ChatInterface, ChatFactory
 
 
 @api_view(['GET'])
@@ -31,9 +33,6 @@ async def get_chat_history(request: Request) -> Response:
     return Response(chat.chat_history)
 
 
-
-
-
 @api_view(['POST'])
 async def send_message(request: Request) -> Response:
     """
@@ -42,6 +41,25 @@ async def send_message(request: Request) -> Response:
     :return: restframework.response.Response
     """
 
-    pass
+    student_id = request.data.get('student_id')
+    course = request.data.get('course')
+    timetable = request.data.get('timetable')
+    full_name = request.data.get('full_name')
+    text = request.data.get("text")
+
+
+    # Получаем chat_history
+    chat_factory = ChatFactory()
+    chat: ChatInterface = chat_factory.get_or_create(
+        student_id,
+        course=course,
+        timetable=timetable,
+        full_name=full_name
+    )
+
+    chat.send_message(text)
+
+    # TODO: создай другие статусы и опиши в документации
+    return Response(200)
 
 
