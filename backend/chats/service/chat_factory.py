@@ -25,7 +25,6 @@ class ChatFactory:
             self.__class__._initialized = True  # set initial flag to True
             self.__init()
 
-
     def __init(self):
         """
         Из python документации при подобной реализации паттерна,
@@ -42,11 +41,16 @@ class ChatFactory:
         :return: объект типа ChatInterface
         """
 
-        chat: Optional[ChatInterface]  = self.__dispatcher.get_chat(student_id)
+        chat: Optional[ChatInterface] = self.__dispatcher.get_chat(student_id)
 
         if chat is not None:
             return chat
 
         # warning! Concrete chat.
-        chat: ChatInterface = InMemoryChat(student_id, **kwargs)
-        return chat
+        try:
+            chat: ChatInterface = InMemoryChat(student_id, **kwargs)
+            return chat
+        except TypeError:
+            raise TypeError(
+                "Так как чат не был найден в ChatDispatcher, была предпринята попытка создать новый чат, однако конструктору не хватило аргументов"
+            )

@@ -2,11 +2,13 @@
 InMemoryChat реализация
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
+
+from channels.consumer import AsyncConsumer
 
 from chats.service.chat_interface import ChatInterface
 from chats.service.producer import KafkaProducer
-
+from chats.consumers import GetAnswerConsumers
 
 class InMemoryChat(ChatInterface):
     """
@@ -35,8 +37,9 @@ class InMemoryChat(ChatInterface):
         self.__timetable: dict = timetable
         self.__course: str = course
         self.__chat_history: List[Dict[str, str]] = []
+        self.__websocket_consumer: Optional[GetAnswerConsumers] = None
 
-    def send_message(self, text: str) -> None:
+    async def send_message(self, text: str) -> None:
         """
         Добавить сообщение в историю сообщений, отправить пользователю, закрыть сокет
         Остальное см. в документации интерфейса
@@ -44,15 +47,18 @@ class InMemoryChat(ChatInterface):
         """
 
         self.__new_message(text, "helper")
-        # TODO: реализуй обновление чата и закрытие сокета
+        await self.__websocket_consumer.send_answer(text)
+        self.__websocket_consumer = None
 
-    def receive_message(self, text) -> None:
+    async def receive_message(self, text) -> None:
         """
         Получить сообщение, добавить в историю сообщений, отправить запрос нейросети и открыть сокет.
         Остальное см. в документации интерфейса
         :param text: текст сообщения
         """
         self.__new_message(text, "student")
+
+        # TODO: rewrite kafka to async
         KafkaProducer().produce_new_message(
             chat=self.__chat_history,
             student_id=self.__student_id,
@@ -61,12 +67,14 @@ class InMemoryChat(ChatInterface):
             course=self.__course
         )
 
-    def delete_chat(self) -> None:
+    async def delete_chat(self) -> None:
         """
         Поведение при удалении чата
         Остальное см. в документации интерфейса
         """
-        pass
+
+        await self.__websocket_consumer.disconnect(200)
+        self.__websocket_consumer = None
 
     def __new_message(self, text: str, role: str) -> None:
         """
@@ -86,3 +94,9 @@ class InMemoryChat(ChatInterface):
         """
 
         return self.__chat_history
+
+    def set_consumer(self, consumer: Optional[AsyncConsumer]) -> None:
+        """
+        Установите consumer
+        """
+        self.__websocket_consumer = consumer

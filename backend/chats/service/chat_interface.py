@@ -2,8 +2,11 @@
 ChatInterface
 """
 
-
+from typing import Optional
 from abc import ABC, abstractmethod
+
+from channels.consumer import AsyncConsumer
+
 
 class ChatInterface(ABC):
     """
@@ -11,7 +14,7 @@ class ChatInterface(ABC):
     """
 
     @abstractmethod
-    def send_message(self, text) -> None:
+    async def send_message(self, text) -> None:
         """
         Отправить сообщение в чат от имени нейросети
         :param text: текст сообщения
@@ -19,7 +22,7 @@ class ChatInterface(ABC):
         pass
 
     @abstractmethod
-    def receive_message(self, text) -> None:
+    async def receive_message(self, text) -> None:
         """
         Получить сообщение от студента
         :param text: текст сообщения
@@ -27,7 +30,7 @@ class ChatInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_chat(self) -> None:
+    async def delete_chat(self) -> None:
         """
         Поведение объекта чата при его удалении
         """
@@ -39,5 +42,12 @@ class ChatInterface(ABC):
         """
         История чатов не может быть изменена, но должна быть доступна из вне
         :return: история чатов
+        """
+        pass
+
+    @abstractmethod
+    def set_consumer(self, consumer: Optional[AsyncConsumer]) -> None:
+        """
+        Установите consumer для chat
         """
         pass
