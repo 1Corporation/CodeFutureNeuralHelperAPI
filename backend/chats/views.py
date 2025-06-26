@@ -1,10 +1,15 @@
+"""
+Все представления rest api в сервисе chats
+"""
+
+
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from chats.service import ChatInterface, ChatFactory
-
+from chats.decorators import service_auth_required
 
 @api_view(['GET'])
 async def get_chat_history(request: Request) -> Response:
@@ -100,11 +105,12 @@ async def receive_message(request: Request):
             data={"comment": "Chat not found. First, send a request to /api/v1/chat_history."},
             status=HTTP_404_NOT_FOUND)
 
-    chat.receive_message(text)
+    await chat.receive_message(text)
     return Response(status=HTTP_200_OK)
 
 
 @api_view(['POST'])
+@service_auth_required
 async def send_message(request: Request) -> Response:
     """
     Отправить сообщение от помощника в чат студента.
@@ -115,6 +121,9 @@ async def send_message(request: Request) -> Response:
     Body Parameters (application/json):
         - student_id (str, required): Уникальный идентификатор студента.
         - text (str, required): Текст сообщения от помощника.
+
+    Headers:
+        - Authorization: Service + SECRET_KEY
 
     Returns:
         Response: Пустой ответ с кодом статуса.
@@ -128,6 +137,12 @@ async def send_message(request: Request) -> Response:
         {
             "student_id": "12345",
             "text": "Ваш запрос принят. Ожидайте ответа."
+        }
+
+        + Headers
+
+        {
+            "Authorization": Service `SECRET_KEY`
         }
 
     Примечание:
@@ -147,5 +162,5 @@ async def send_message(request: Request) -> Response:
             data={"comment": "Chat not found. First, send a request to /api/v1/chat_history."},
             status=HTTP_404_NOT_FOUND)
 
-    chat.send_message(text)
+    await chat.send_message(text)
     return Response(status=HTTP_200_OK)

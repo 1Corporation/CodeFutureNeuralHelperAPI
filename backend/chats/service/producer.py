@@ -4,7 +4,7 @@
 
 import json
 
-from confluent_kafka import Producer
+from aiokafka import AIOKafkaProducer
 
 
 class KafkaProducer:
@@ -31,12 +31,12 @@ class KafkaProducer:
         конструктор должен иметь название __init, вместо обычного конструктора
         """
 
-        self.__producer = Producer({"bootstrap.servers": "kafka:9092"})
+        self.__producer = AIOKafkaProducer(bootstrap_servers="kafka:9092")
         self.__topic = "ai-topic"
 
-    def produce_new_message(self, **kwargs):
+    async def produce_new_message(self, **kwargs):
         """
         Отправь сообщение консьюмеру
         """
         data = json.dumps(kwargs)
-        self.__producer.produce(self.__topic, value=data)
+        await self.__producer.send(self.__topic, value=data)

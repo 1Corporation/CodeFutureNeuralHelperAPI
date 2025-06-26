@@ -14,12 +14,14 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from channels.sessions import SessionMiddlewareStack
 
+from chats.routing import websocket_url_patterns
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
-application = get_asgi_application()    
+asgi_application = get_asgi_application()
 
 application = ProtocolTypeRouter({
-            "http": application,
+            "http": asgi_application,
             "websocket": AllowedHostsOriginValidator(
-                SessionMiddlewareStack(URLRouter(chessboards_websocket_url_patterns)))
+                SessionMiddlewareStack(URLRouter(websocket_url_patterns)))
                        })

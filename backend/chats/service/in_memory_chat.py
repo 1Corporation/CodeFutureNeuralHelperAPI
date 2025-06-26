@@ -59,7 +59,7 @@ class InMemoryChat(ChatInterface):
         self.__new_message(text, "student")
 
         # TODO: rewrite kafka to async
-        KafkaProducer().produce_new_message(
+        await KafkaProducer().produce_new_message(
             chat=self.__chat_history,
             student_id=self.__student_id,
             full_name=self.__full_name,
