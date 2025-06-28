@@ -8,7 +8,7 @@ from channels.consumer import AsyncConsumer
 
 from chats.service.chat_interface import ChatInterface
 from chats.service.producer import KafkaProducer
-from chats.consumers import GetAnswerConsumers
+from chats.consumer_interface import IGetAnswerConsumers
 
 class InMemoryChat(ChatInterface):
     """
@@ -37,7 +37,7 @@ class InMemoryChat(ChatInterface):
         self.__timetable: dict = timetable
         self.__course: str = course
         self.__chat_history: List[Dict[str, str]] = []
-        self.__websocket_consumer: Optional[GetAnswerConsumers] = None
+        self.__websocket_consumer: Optional[IGetAnswerConsumers] = None
 
     async def send_message(self, text: str) -> None:
         """
@@ -58,7 +58,6 @@ class InMemoryChat(ChatInterface):
         """
         self.__new_message(text, "student")
 
-        # TODO: rewrite kafka to async
         await KafkaProducer().produce_new_message(
             chat=self.__chat_history,
             student_id=self.__student_id,

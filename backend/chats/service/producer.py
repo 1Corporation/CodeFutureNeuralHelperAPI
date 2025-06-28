@@ -5,6 +5,7 @@
 import json
 
 from aiokafka import AIOKafkaProducer
+from asgiref.sync import async_to_sync
 
 
 class KafkaProducer:
@@ -31,12 +32,21 @@ class KafkaProducer:
         конструктор должен иметь название __init, вместо обычного конструктора
         """
 
-        self.__producer = AIOKafkaProducer(bootstrap_servers="kafka:9092")
+        self.__producer: AIOKafkaProducer = AIOKafkaProducer(bootstrap_servers="kafka:9092")
         self.__topic = "ai-topic"
+
+        # Я не могу запустить AIOKafkaProducer в конструкторе, так как он синхронный
+        # Я "лениво" запущу продюсер в produce_new_message, при помощи этого флага
+        self.__started = False
 
     async def produce_new_message(self, **kwargs):
         """
         Отправь сообщение консьюмеру
         """
-        data = json.dumps(kwargs)
+        data = json.dumps(kwargs).encode("utf-8")
+
+        if not self.__started:
+            await self.__producer.start()
+            self.__started = True
+
         await self.__producer.send(self.__topic, value=data)

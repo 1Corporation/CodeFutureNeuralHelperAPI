@@ -2,16 +2,20 @@
 Работа с kafka
 """
 
+import os
 from typing import Optional
 import json
 import requests
+from dotenv import load_dotenv
 
 from confluent_kafka import Consumer, Message, KafkaException
 
 from ai_process import process
 
-HOST = "daphne:8000"
+load_dotenv()
 
+HOST = "backend:8000"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 class KafkaConsumer:
     """
@@ -37,7 +41,7 @@ class KafkaConsumer:
         msg: Message = self.__consumer.poll()
 
         # Обработка сообщения
-        value: Optional[str] = msg.value(None)
+        value: Optional[str] = msg.value()
 
         if value is None:
             raise RuntimeError("content in message is None!")
@@ -50,7 +54,11 @@ class KafkaConsumer:
 
         # отправка ответа
         data = {"student_id": json_message["student_id"], "answer": answer}
-        requests.post("http://" + HOST + "/api/v1/answer/", data=json.dumps(data))
+        requests.post(
+            "http://" + HOST + "/api/v1/send_message",
+            data=json.dumps(data),
+            headers = {"Authorization": "Service " + SECRET_KEY,
+                       "Content-Type": "application/json"})
 
 
     def run(self) -> None:

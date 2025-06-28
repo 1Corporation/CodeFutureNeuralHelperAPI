@@ -2,13 +2,13 @@
 Все представления rest api в сервисе chats
 """
 
-
-from rest_framework.decorators import api_view
+from adrf.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from chats.service import ChatInterface, ChatFactory
+from chats.service.chat_interface import ChatInterface
+from chats.service.chat_factory import ChatFactory
 from chats.decorators import service_auth_required
 
 @api_view(['GET'])
@@ -98,6 +98,8 @@ async def receive_message(request: Request):
     # Получаем chat_history
     chat_factory = ChatFactory()
 
+
+    # TODO: Ошибка почему-то не вызывается
     try:
         chat: ChatInterface = chat_factory.get_or_create(student_id)
     except TypeError:
@@ -151,6 +153,7 @@ async def send_message(request: Request) -> Response:
 
     student_id = request.data.get('student_id')
     text = request.data.get("text")
+    print(text)
 
     # Получаем chat_history
     chat_factory = ChatFactory()

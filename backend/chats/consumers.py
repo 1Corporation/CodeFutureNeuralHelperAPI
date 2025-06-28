@@ -7,12 +7,13 @@ import urllib.parse
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from chats.service import ChatFactory
-from chats.service import ChatInterface
+from chats.service.chat_factory import ChatFactory
+from chats.service.chat_interface import ChatInterface
+from chats.consumer_interface import IGetAnswerConsumers
 
 
 
-class GetAnswerConsumers(AsyncJsonWebsocketConsumer):
+class GetAnswerConsumers(AsyncJsonWebsocketConsumer, IGetAnswerConsumers):
     """
     Консьюмер отвечающий за получение ответа от ИИ помощника
     Обновления и прочее
@@ -23,7 +24,7 @@ class GetAnswerConsumers(AsyncJsonWebsocketConsumer):
         """
         override consumer connect method
         """
-        
+
         # Получаем student_id
         query_string = self.scope["query_string"].decode()
         query_params = urllib.parse.parse_qs(query_string)
@@ -34,7 +35,7 @@ class GetAnswerConsumers(AsyncJsonWebsocketConsumer):
         __chat: ChatInterface = chat_factory.get_or_create(student_id)
         __chat.set_consumer(self)
 
-        await self.connect()
+        await self.accept()
 
 
     async def disconnect(self, code):

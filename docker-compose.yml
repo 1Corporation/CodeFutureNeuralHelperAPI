@@ -8,14 +8,23 @@ services:
       context: .
       dockerfile: dockerfiles/backend/Dockerfile
     tty: true
-    command: sh -c "python3 manage.py migrate && python3 -u -m daphne new_year.asgi:application -b backend -p 8000"
+    depends_on:
+      - ai
+    command: sh -c "python3 manage.py migrate && python3 -u -m daphne backend.asgi:application -b backend -p 8000"
     restart: always
-    expose:
-      - 8000
+    ports:
+      - "8000:8000"
 
   ai:
+    build:
+      context: .
+      dockerfile: dockerfiles/ai/Dockerfile
+    depends_on:
+      - kafka
+    tty: true
+    command: sh -c "python3 main.py"
+    restart: always
 
-    
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -25,7 +34,9 @@ services:
       - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    build:
+      context: .
+      dockerfile: dockerfiles/kafka/Dockerfile
     depends_on:
       - zookeeper
     ports:
@@ -33,9 +44,17 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-            
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
 
-        
+  # Сервис создающий kafka-topic при создании сервера
+  create-topic:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    command: |
+      bash -c "kafka-topics --bootstrap-server kafka:9092 --create --topic ai-topic --partitions 1 --replication-factor 1"
+    restart: on-failure
