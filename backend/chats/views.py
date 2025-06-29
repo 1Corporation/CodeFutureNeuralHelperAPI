@@ -2,14 +2,23 @@
 Все представления rest api в сервисе chats
 """
 
+import time
+
 from adrf.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
+from rest_framework.status import (HTTP_200_OK,
+                                   HTTP_404_NOT_FOUND,
+                                   HTTP_400_BAD_REQUEST,
+                                   HTTP_403_FORBIDDEN,
+                                   HTTP_429_TOO_MANY_REQUESTS)
 
 from chats.service.chat_interface import ChatInterface
 from chats.service.chat_factory import ChatFactory
 from chats.decorators import service_auth_required
+
+REQUEST_COOLDOWN = 10
+
 
 @api_view(['GET'])
 async def get_chat_history(request: Request) -> Response:
@@ -62,6 +71,7 @@ async def get_chat_history(request: Request) -> Response:
 
 @api_view(["POST"])
 async def receive_message(request: Request):
+
     """
     Принять сообщение от пользователя и передать его помощнику.
 
@@ -79,6 +89,7 @@ async def receive_message(request: Request):
     Status Codes:
         - 200 OK: Сообщение успешно принято.
         - 404 Not Found: Чат не найден. Необходимо сначала выполнить запрос к `/api/v1/chat_history/`.
+        - 403 Forbidden: Пользователь уже ожидает ответ от нейросети, и его запрос отклонен
 
     Пример запроса:
         POST /api/v1/receive_message/
@@ -98,14 +109,20 @@ async def receive_message(request: Request):
     # Получаем chat_history
     chat_factory = ChatFactory()
 
-
-    # TODO: Ошибка почему-то не вызывается
     try:
         chat: ChatInterface = chat_factory.get_or_create(student_id)
     except TypeError:
         return Response(
             data={"comment": "Chat not found. First, send a request to /api/v1/chat_history."},
             status=HTTP_404_NOT_FOUND)
+
+    # Если пользователь уже отправил запрос и ожидает ответа
+    if chat.is_wait:
+        return Response(data={"comment": "You already send request. Please wait!"}, status=HTTP_403_FORBIDDEN)
+
+    # Кулдаун на запросы
+    if time.time() - chat.last_request_time < REQUEST_COOLDOWN:
+        return Response(data={"comment": "Too many requests. Please wait"}, status=HTTP_429_TOO_MANY_REQUESTS)
 
     await chat.receive_message(text)
     return Response(status=HTTP_200_OK)
@@ -133,6 +150,7 @@ async def send_message(request: Request) -> Response:
     Status Codes:
         - 200 OK: Сообщение успешно отправлено.
         - 404 Not Found: Чат не найден. Необходимо сначала выполнить запрос к `/api/v1/chat_history/`.
+        - 400 Bad Request: Пользователь не подключился к wait_request websocket перед отправлением запроса
 
     Пример запроса:
         POST /api/v1/send_message/
@@ -153,7 +171,6 @@ async def send_message(request: Request) -> Response:
 
     student_id = request.data.get('student_id')
     text = request.data.get("text")
-    print(text)
 
     # Получаем chat_history
     chat_factory = ChatFactory()
@@ -165,5 +182,11 @@ async def send_message(request: Request) -> Response:
             data={"comment": "Chat not found. First, send a request to /api/v1/chat_history."},
             status=HTTP_404_NOT_FOUND)
 
-    await chat.send_message(text)
+    try:
+        await chat.send_message(text)
+    except AttributeError:  # Если клиент не подключился к websocket перед запросом, его запрос должен быть отклонен
+        return Response(
+            data={"comment": "You should connect to /websocket/v1/wait_answer before send request"},
+            status=HTTP_400_BAD_REQUEST)
+
     return Response(status=HTTP_200_OK)

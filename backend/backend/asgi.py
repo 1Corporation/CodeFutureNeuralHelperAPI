@@ -20,8 +20,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
 asgi_application = get_asgi_application()
 
+# Будь внимателен, отправляй правильный origin в headers при запросе на подключение
 application = ProtocolTypeRouter({
             "http": asgi_application,
-            "websocket":
-                SessionMiddlewareStack(URLRouter(websocket_url_patterns))
+            "websocket": AllowedHostsOriginValidator(
+                SessionMiddlewareStack(URLRouter(websocket_url_patterns)))
                        })

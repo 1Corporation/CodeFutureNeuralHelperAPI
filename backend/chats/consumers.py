@@ -32,8 +32,18 @@ class GetAnswerConsumers(AsyncJsonWebsocketConsumer, IGetAnswerConsumers):
 
         # Устанавливаем consumer для 
         chat_factory: ChatFactory = ChatFactory()
-        __chat: ChatInterface = chat_factory.get_or_create(student_id)
-        __chat.set_consumer(self)
+        try:
+            chat: ChatInterface = chat_factory.get_or_create(student_id)
+        except TypeError:
+            # TODO: Отклони на этапе HTTP
+            await self.close(code=4004, reason="Chat not found. First, send a request to /api/v1/chat_history.")
+            return
+
+        if not chat.is_wait:
+            await self.close(code=4003, reason="User doesn't wait answer by AI. First, send request to /api/v1/receive_message")
+            return
+
+        chat.set_consumer(self)
 
         await self.accept()
 
@@ -51,6 +61,6 @@ class GetAnswerConsumers(AsyncJsonWebsocketConsumer, IGetAnswerConsumers):
         """
 
         await self.send_json({"event": "answer", "text": text})
-        await self.disconnect(200)
+        await self.disconnect(1000)
 
 

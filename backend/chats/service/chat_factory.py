@@ -7,7 +7,7 @@ from chats.service.chat_dispatcher import ChatDispatcher
 from chats.service.chat_interface import ChatInterface
 from chats.service.in_memory_chat import InMemoryChat
 
-# TODO: Здесь происходит какой-то пиздец, создаются какие-то рандомные чаты блять хуй пойми из чего фикси это
+
 class ChatFactory:
     """
     Сочетает в себе паттерн Factory и Dispatcher, задача создавать и раздавать объекты ChatInterface
@@ -49,6 +49,7 @@ class ChatFactory:
         # warning! Concrete chat.
         try:
             chat: ChatInterface = InMemoryChat(student_id, **kwargs)
+            self.__dispatcher.add_chat(student_id, chat)
             return chat
         except TypeError:
             raise TypeError(

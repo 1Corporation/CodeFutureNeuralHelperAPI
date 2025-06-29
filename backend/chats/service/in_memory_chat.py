@@ -2,6 +2,7 @@
 InMemoryChat реализация
 """
 
+import time
 from typing import List, Dict, Optional
 
 from channels.consumer import AsyncConsumer
@@ -32,12 +33,17 @@ class InMemoryChat(ChatInterface):
         :return: None
         """
 
+        if timetable is None or course is None or full_name is None:
+            raise TypeError("Not enough parameters")
+
         self.__student_id: int = student_id
         self.__full_name: str = full_name
         self.__timetable: dict = timetable
         self.__course: str = course
         self.__chat_history: List[Dict[str, str]] = []
         self.__websocket_consumer: Optional[IGetAnswerConsumers] = None
+        self.__is_wait: bool = False  # Отвечает за блокировку чата во время ожидания ответа на запрос
+        self.__last_request_time: int = 0  # unix time последнего запроса к нейросети
 
     async def send_message(self, text: str) -> None:
         """
@@ -57,7 +63,8 @@ class InMemoryChat(ChatInterface):
         :param text: текст сообщения
         """
         self.__new_message(text, "student")
-
+        self.__is_wait = True
+        self.__last_request_time = time.time()
         await KafkaProducer().produce_new_message(
             chat=self.__chat_history,
             student_id=self.__student_id,
@@ -84,6 +91,7 @@ class InMemoryChat(ChatInterface):
 
         message = {"text": text, role: role}
         self.__chat_history.append(message)
+        self.__is_wait = False
 
     @property
     def chat_history(self):
@@ -91,7 +99,6 @@ class InMemoryChat(ChatInterface):
         История чатов не может быть изменена, но должна быть доступна из вне
         :return: история чатов
         """
-
         return self.__chat_history
 
     def set_consumer(self, consumer: Optional[AsyncConsumer]) -> None:
@@ -99,3 +106,18 @@ class InMemoryChat(ChatInterface):
         Установите consumer
         """
         self.__websocket_consumer = consumer
+
+    @property
+    def is_wait(self) -> bool:
+        """
+        Верните статус чата, находится ли в он в ожидании ответа
+        """
+        return self.__is_wait
+
+    @property
+    def last_request_time(self) -> int:
+        """
+        getter последнего запроса к нейросети
+        """
+        return self.__last_request_time
+

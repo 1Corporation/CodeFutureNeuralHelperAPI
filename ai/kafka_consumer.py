@@ -53,7 +53,7 @@ class KafkaConsumer:
         answer: str = process(json_message)
 
         # отправка ответа
-        data = {"student_id": json_message["student_id"], "answer": answer}
+        data = {"student_id": json_message["student_id"], "text": answer}
         requests.post(
             "http://" + HOST + "/api/v1/send_message",
             data=json.dumps(data),

@@ -51,3 +51,19 @@ class ChatInterface(ABC):
         Установите consumer для chat
         """
         pass
+
+    @property
+    @abstractmethod
+    def is_wait(self) -> bool:
+        """
+        Верните статус чата, находится ли в он в ожидании ответа
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def last_request_time(self) -> int:
+        """
+        getter последнего запроса к нейросети
+        """
+        pass

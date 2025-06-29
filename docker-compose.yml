@@ -1,5 +1,4 @@
 # docker-compose.yml
-version: '3'
 
 services:
 
@@ -49,6 +48,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+    restart: always  # do not remove this! That's fix NodeExists error :pig:
 
   # Сервис создающий kafka-topic при создании сервера
   create-topic:
@@ -57,4 +57,3 @@ services:
       - kafka
     command: |
       bash -c "kafka-topics --bootstrap-server kafka:9092 --create --topic ai-topic --partitions 1 --replication-factor 1"
-    restart: on-failure

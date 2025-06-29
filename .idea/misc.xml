@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.13 virtualenv at ~/Desktop/CodeFutureNeuralHelperAPI/.venv" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.13 (CodeFutureNeuralHelperAPI)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.13.5 Docker Compose (backend)" project-jdk-type="Python SDK" />
 </project>
