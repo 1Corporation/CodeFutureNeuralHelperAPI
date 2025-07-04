@@ -1,0 +1,80 @@
+:root {
+  /* Основная цветовая палитра */
+  --color-primary: #FFC107; /* Желтый */
+  --color-secondary: #FF9800; /* Оранжевый */
+  --color-accent: #FF5722; /* Темно-оранжевый */
+  --color-light: #FFF8E1; /* Светлый желтый */
+  --color-dark: #E65100; /* Темный оранжевый */
+
+  /* Нейтральные цвета */
+  --color-text: #333333;
+  --color-text-light: #757575;
+  --color-background: #FFFBF2;
+  --color-card: #FFFFFF;
+
+  /* Вспомогательные цвета */
+  --color-success: #4CAF50;
+  --color-error: #F44336;
+  --color-info: #2196F3;
+
+  /* Размеры и радиусы */
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* Стили для кнопок */
+.btn {
+  padding: 10px 16px;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-secondary);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-accent);
+}
+
+/* Стили для карточек */
+.card {
+  background-color: var(--color-card);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  box-shadow: var(--box-shadow);
+}
+
+/* Стили для анимации */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}

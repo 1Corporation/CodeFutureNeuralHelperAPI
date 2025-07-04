@@ -89,7 +89,7 @@ class InMemoryChat(ChatInterface):
         :param role: кто отправил сообщение
         """
 
-        message = {"text": text, role: role}
+        message = {"text": text, 'role': role}
         self.__chat_history.append(message)
         self.__is_wait = False
 

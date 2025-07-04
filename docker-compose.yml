@@ -11,8 +11,27 @@ services:
       - ai
     command: sh -c "python3 manage.py migrate && python3 -u -m daphne backend.asgi:application -b backend -p 8000"
     restart: always
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
+
+  nginx:
+      build:
+          context: .
+          dockerfile: ./dockerfiles/nginx/Dockerfile
+      depends_on:
+          - backend
+          - frontend
+      ports:
+          - "80:80"
+      volumes:
+          - static:/static/
+
+  frontend:
+    build:
+      context: .
+      dockerfile: dockerfiles/frontend/Dockerfile
+    volumes:
+      - static:/dist/
 
   ai:
     build:
@@ -57,3 +76,8 @@ services:
       - kafka
     command: |
       bash -c "kafka-topics --bootstrap-server kafka:9092 --create --topic ai-topic --partitions 1 --replication-factor 1"
+
+
+volumes:
+  static:
+    external: true
