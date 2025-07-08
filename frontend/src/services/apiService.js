@@ -6,7 +6,7 @@
  */
 
 // Базовый URL API (замените на свой)
-const API_BASE_URL = 'http://localhost/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 /**
  * Отправка сообщения нейросети и получение ответа
