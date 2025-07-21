@@ -121,7 +121,20 @@ const sendMessage = async () => {
 
   try {
     // Отправляем запрос к API нейросети
-    await sendMessageToAI(text, student_id);
+    const response = await sendMessageToAI(text, student_id);
+
+    // TODO: Затестить 127-136
+    if (response.status === 429) {
+        const errorMessage = createAIMessage("Ты слишком часто отправляешь запросы!");
+        messages.value.push(errorMessage);
+        return;
+    }
+
+    if (response.status === 403) {
+      const errorMessage = createAIMessage("Ты уже отправил запрос нейросети! Дождись ответа")
+      messages.value.push(errorMessage)
+      return;
+    }
 
     useWebSockets(student_id, onAnswerReceive);
   } catch (error) {

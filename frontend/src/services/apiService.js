@@ -57,12 +57,9 @@ export const getChatHistory = async (student_id, full_name, course, timetable) =
                 }
             });
 
-
         if (!response.ok) {
             throw new Error(`Ошибка API: ${response.status}`);
         }
-
-
 
         return await response.json();
     } catch (error) {
