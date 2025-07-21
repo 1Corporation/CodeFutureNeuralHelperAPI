@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "backend", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "backend", "localhost", "code-for-future.uc1.tech"]
 
 
 # Application definition

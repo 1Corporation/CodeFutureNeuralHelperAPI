@@ -6,7 +6,7 @@
  */
 
 // Базовый URL API (замените на свой)
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = 'https://code-for-future.uc1.tech:8000/api/v1';
 
 /**
  * Отправка сообщения нейросети и получение ответа
@@ -57,9 +57,12 @@ export const getChatHistory = async (student_id, full_name, course, timetable) =
                 }
             });
 
+
         if (!response.ok) {
             throw new Error(`Ошибка API: ${response.status}`);
         }
+
+
 
         return await response.json();
     } catch (error) {

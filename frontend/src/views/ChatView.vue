@@ -1,9 +1,9 @@
 <template>
   <div class="chat-container">
     <header class="chat-header">
-      <h1>Помощник от Кода Будущего от 1С</h1>
+      <h1>Интеллектуальный помощник 1С:Учебного центра</h1>
       <p>Перепроверяйте ответы от нейросети, помощник существует исключительно для справки. Если останутся вопросы,
-        перейдите в <a href="https://t.me/party_notificaton_codefuture_bot">чат-бот</a> с живым человеком</p>
+        перейдите в <a href="https://t.me/ForFuture1CBot">чат-бот</a> с живым человеком</p>
     </header>
 
     <div class="chat-messages" ref="messagesContainer">

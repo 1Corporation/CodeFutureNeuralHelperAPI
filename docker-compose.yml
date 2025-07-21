@@ -42,7 +42,10 @@ services:
     tty: true
     command: sh -c "python3 main.py"
     restart: always
-
+    volumes:
+        - /home/ai_GxqTa9pGKERPtt7aG/mistral-qlora:/mistral-qlora
+        - /home/ai_GxqTa9pGKERPtt7aG/mistral-7b:/mistral-7b
+        - /home/ai_GxqTa9pGKERPtt7aG/embeddings:/embeddings
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -80,4 +83,4 @@ services:
 
 volumes:
   static:
-    external: true
+    external: false
