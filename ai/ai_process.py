@@ -7,7 +7,8 @@ from sentence_transformers import SentenceTransformer
 from peft import PeftModel
 import torch
 import numpy as np
-import time
+
+from message_validator import MessageValidator
 
 BASE_MODEL_PATH = "/mistral-7b"
 QLORA_ADAPTER_PATH = "/mistral-qlora"
@@ -41,6 +42,9 @@ def process(message: dict) -> str:
     """
 
     text = message["chat"][-1]["text"]
+
+    if not MessageValidator().validate(text):
+        return "Это сообщение нарушает политику использования Интеллектуального помощника 1С:Учебного центра. Я не могу ответить на это сообщение"
 
     # Проверка эмбеддинга
     text_embeddings = sentence_model.encode(text)
